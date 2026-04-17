@@ -8,6 +8,9 @@ beforeEach(() => {
   process.env.SUPABASE_URL = "https://x.supabase.co";
   process.env.SUPABASE_SERVICE_ROLE_KEY = "k";
   process.env.AUTOMATION_SECRET = "01234567890123456789";
+  process.env.TRIAGE_PASSWORD = "hunter2-long";
+  process.env.NEXT_PUBLIC_SITE_URL = "http://localhost:3000";
+  process.env.SESSION_SIGNING_SECRET = "a".repeat(32);
 });
 
 afterEach(() => vi.unstubAllGlobals());
