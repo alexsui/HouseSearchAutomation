@@ -48,12 +48,14 @@ const handler = createMcpHandler(
       {
         title: "Send LINE Notification",
         description:
-          "Broadcast a LINE message. If listing_id + event_type + event_hash are all provided, records the outcome and rejects duplicates by that key. If any of those three is omitted, the call is a standalone push — no DB write, no dedup.",
+          "Notify via LINE broadcast. Preferred shape: {candidate, event_type, triage_base_url} — server renders the message and dedupes by (source, source_listing_id, event_type, event_hash). Legacy shape: {listing_id, event_type, event_hash, message_body}. Ad-hoc shape: {message_body}.",
         inputSchema: {
-          message_body: z.string().min(1),
-          listing_id: z.string().uuid().optional(),
+          candidate: CandidateSchema.optional(),
           event_type: z.string().min(1).optional(),
+          triage_base_url: z.string().url().optional(),
+          listing_id: z.string().uuid().optional(),
           event_hash: z.string().regex(/^[0-9a-f]{64}$/).optional(),
+          message_body: z.string().min(1).optional(),
         },
       },
       async (input) => {
