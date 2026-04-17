@@ -79,6 +79,11 @@ export function renderMessage(input: RenderInput): string {
   if (c.photo_review === "poor") lines.push("⚠ 高度警示：照片狀況不佳，建議手動確認");
 
   lines.push(`591：${c.listing_identity.source_url}`, `詳情頁：${triage_url}`);
+
+  // Notifier self-attribution as the final line. Provided by the agent —
+  // server does not hardcode a model name.
+  if (c.notifier_signature) lines.push("", `— ${c.notifier_signature}`);
+
   return lines.join("\n");
 }
 

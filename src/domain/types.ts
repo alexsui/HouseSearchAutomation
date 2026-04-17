@@ -42,4 +42,5 @@ export interface Candidate {
   concerns: string[];
   change_type: ChangeType;
   should_notify: boolean;
+  notifier_signature?: string;
 }
