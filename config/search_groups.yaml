@@ -1,41 +1,14 @@
-- name: neihu_nangang
+- name: taipei_main
   priority: 1
-  districts: [Neihu, Nangang]
+  districts: [Neihu, Nangang, Shilin, Beitou, Songshan, Zhishan, Mingde, Shipai, Dazhi, Jiannan]
   search_urls:
-    - https://rent.591.com.tw/list?region=1&section=120,118&rentprice=,30000&shType=1&multiRoom=2,3
-    - https://rent.591.com.tw/list?region=1&section=117&rentprice=,30000&shType=1&multiRoom=2,3
+    - https://rent.591.com.tw/list?region=1&section=10,8,11,3,4&kind=1&price=20000_30000&layout=2&other=cook
   note: >
-    Primary target. shType=1 = 整層住家 (whole-floor apartment). multiRoom=2,3
-    filters out 1房1廳 and studio/suite (套房). Verify 591 section codes in the
-    UI and update if returned districts don't match.
-
-- name: xizhi_neihu_border
-  priority: 2
-  districts: [Xizhi]
-  search_urls:
-    - https://rent.591.com.tw/list?region=3&section=28&rentprice=,30000&shType=1&multiRoom=2,3
-  note: >
-    Xizhi ONLY if the listing is clearly very close (~500m-1km) to the Neihu
-    border. Neihu-adjacent signals: 新台五路, 康寧街, 成功路 4-5 段, near 環東大道.
-    When proximity is uncertain from the public address / nearby-location info,
-    EXCLUDE the listing rather than notifying.
-
-- name: shilin_beitou
-  priority: 2
-  districts: [Shilin, Zhishan, Mingde, Shipai]
-  search_urls:
-    - https://rent.591.com.tw/list?region=1&section=107&rentprice=,30000&shType=1&multiRoom=2,3
-    - https://rent.591.com.tw/list?region=1&section=104&rentprice=,30000&shType=1&multiRoom=2,3
-  note: >
-    Shilin / Beitou corridor. Zhishan / Mingde / Shipai are stations inside
-    these districts.
-
-- name: exploratory
-  priority: 3
-  districts: [Songshan, Dazhi, Jiannan]
-  search_urls:
-    - https://rent.591.com.tw/list?region=1&section=105&rentprice=,30000&shType=1&multiRoom=2,3
-  note: >
-    Outer Songshan, Dazhi, around Jiannan Road. Exploration only — do not
-    assume commute is acceptable. Only flag listings that are unusually
-    compelling.
+    Single consolidated Taipei URL covering the five core districts
+    (內湖, 南港, 士林, 北投, 松山 — section=10,8,11,3,4). Filters:
+    kind=1 (整層住家), layout=2 (2-bedroom), price 20k-30k, other=cook
+    (has kitchen). Station areas inside these districts (Zhishan, Mingde,
+    Shipai, Dazhi, Jiannan) are whitelisted for detail-page district
+    matching. Xizhi is intentionally excluded from this URL — add a
+    separate Xizhi URL only if you want the Neihu-border proximity rule
+    to be exercised, and filter accordingly in the detail step.

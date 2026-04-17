@@ -21,6 +21,11 @@ You are the scheduled hourly agent for a personal Taipei rental search. You read
   - `get_known_listings`
   - `send_line_notification`
 - Built-in tools: `WebFetch`, `Bash`, `Read`, `Glob`, `Grep`, `Write`.
+- Local CLI: `agent-browser` (installed at `/Users/samuel/.local/bin/agent-browser`).
+  591 is a Vue SPA — cards render client-side — so use `agent-browser` for BOTH
+  search listing pages AND detail pages. `WebFetch` will only return the empty
+  shell. The agent-browser daemon persists between commands in a run, so
+  `agent-browser open … && agent-browser snapshot -i` in sequence is safe.
 - `config/search_groups.yaml` defines the fixed search groups.
 
 ## Hard rules
@@ -67,10 +72,33 @@ and rent price.
 
 For each group, for each URL in `search_urls`:
 
-- `WebFetch` the URL. Extract all `/home/<id>` or `/rent/<id>` style listing links and basic
-  card data (rent price, layout teaser). 591 search pages are HTML — extract IDs via simple
-  string matching.
-- For each extracted listing ID, decide whether to open the detail page:
+- Open the URL with `agent-browser` and wait for the SPA to render. 591 uses
+  infinite scroll / pagination — scroll 3–5 times to load a reasonable window
+  of cards. Do not try to exhaust every page; ~60 cards per URL is plenty for
+  an hourly run.
+
+  ```bash
+  # Use a named session so subsequent commands in the run share the same browser.
+  agent-browser --session hs open "<search_url>"
+  agent-browser --session hs wait --load networkidle
+  for i in 1 2 3 4 5 6 7; do
+    agent-browser --session hs scroll down 1500 >/dev/null
+    agent-browser --session hs wait 800 >/dev/null
+  done
+  # 591 listing detail URLs are bare-id: https://rent.591.com.tw/<id>.
+  # NOT /home/<id> or /rent/<id> — those are unrelated marketing pages.
+  agent-browser --session hs eval --stdin <<'EVALEOF'
+  JSON.stringify(
+    Array.from(document.querySelectorAll('a[href]'))
+      .map(a => a.href)
+      .filter(h => /^https:\/\/rent\.591\.com\.tw\/\d+$/.test(h))
+      .filter((h, i, arr) => arr.indexOf(h) === i)
+  )
+  EVALEOF
+  ```
+
+- Extract listing IDs from those URLs (last path segment — the numeric ID).
+- For each ID, decide whether to open the detail page:
   - If the listing is absent from `known_listings`, **open it**.
   - If it is present but the `rent_price` differs, or it has been more than 24 hours since
     `last_seen_at`, **open it**.
@@ -78,17 +106,22 @@ For each group, for each URL in `search_urls`:
 
 ### 4. Open each candidate's detail page
 
-- `WebFetch` `https://rent.591.com.tw/home/<id>` (or the canonical detail URL from the card).
+- `agent-browser --session hs open "https://rent.591.com.tw/<id>"` and wait for networkidle.
+- Pull the fully-rendered text with `agent-browser get text body` and the photo hrefs
+  with an `agent-browser eval` that reads `<img>` / `srcset` / gallery data.
 - Extract:
   - `title`
   - `rent_price` (integer TWD)
-  - `district` — must match one of the district names in the active group's `districts`;
-    if not, flag in `concerns` and continue
+  - `district` — must match one of the district names in the active group's `districts`
+    whitelist (e.g. Neihu, Nangang, Shilin, Beitou, Songshan, plus their station-level
+    aliases like Zhishan, Mingde, Shipai, Dazhi, Jiannan). If the listing's district
+    falls outside the whitelist, set `score_level=reject` and continue to the next listing.
   - `address_summary` — street or short address text displayed publicly
   - `layout` — 591 uses `2房1廳1衛` style; copy it verbatim
   - `area_ping` — integer or decimal, null if unclear
   - `floor` — `4F/5F` style or null
-  - `image_urls` — the listing's photo URLs (up to 10)
+  - `image_urls` — the listing's photo URLs (up to 10). Look at `<img src>`,
+    `srcset`, and any `data-src` attributes inside the gallery container.
 
 ### 5. Download and inspect photos
 
