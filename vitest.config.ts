@@ -8,6 +8,7 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
     hookTimeout: 20_000,
     testTimeout: 20_000,
+    fileParallelism: false,
   },
   resolve: {
     alias: {
