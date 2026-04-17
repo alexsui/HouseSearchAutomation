@@ -8,6 +8,9 @@ describe("loadServerEnv", () => {
     LINE_CHANNEL_ACCESS_TOKEN: "t",
     LINE_USER_ID: "U123",
     AUTOMATION_SECRET: "s-at-least-sixteen-chars",
+    TRIAGE_PASSWORD: "hunter2-long-enough",
+    NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
+    SESSION_SIGNING_SECRET: "0".repeat(32),
   };
 
   beforeEach(() => {
@@ -23,5 +26,18 @@ describe("loadServerEnv", () => {
 
   it("throws with list of missing vars", () => {
     expect(() => loadServerEnv()).toThrowError(/AUTOMATION_SECRET/);
+  });
+
+  it("requires TRIAGE_PASSWORD", () => {
+    Object.assign(process.env, base);
+    delete process.env.TRIAGE_PASSWORD;
+    expect(() => loadServerEnv()).toThrowError(/TRIAGE_PASSWORD/);
+  });
+
+  it("parses triage env vars when set", () => {
+    Object.assign(process.env, base);
+    const env = loadServerEnv();
+    expect(env.TRIAGE_PASSWORD).toBe("hunter2-long-enough");
+    expect(env.SESSION_SIGNING_SECRET).toBe("0".repeat(32));
   });
 });
