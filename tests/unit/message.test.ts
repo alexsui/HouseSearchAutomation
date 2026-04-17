@@ -35,6 +35,26 @@ describe("renderMessage", () => {
     expect(msg).toContain("25,000");
   });
 
+  it("appends notifier_signature as the final line when set", () => {
+    const msg = renderMessage({
+      event_type: "new_listing",
+      candidate: { ...validCandidate, notifier_signature: "由 Claude 自動檢查並通知" },
+      triage_url: triageUrl,
+    });
+    const lines = msg.split("\n");
+    expect(lines[lines.length - 1]).toBe("— 由 Claude 自動檢查並通知");
+  });
+
+  it("omits the signature footer when notifier_signature is absent", () => {
+    const msg = renderMessage({
+      event_type: "new_listing",
+      candidate: validCandidate,
+      triage_url: triageUrl,
+    });
+    expect(msg).not.toContain("— ");
+    expect(msg.endsWith(triageUrl)).toBe(true);
+  });
+
   it("marks high concern when photo_review is poor", () => {
     const msg = renderMessage({
       event_type: "new_listing",

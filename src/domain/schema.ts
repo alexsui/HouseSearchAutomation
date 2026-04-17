@@ -35,6 +35,7 @@ export const CandidateSchema = z.object({
     "none",
   ]),
   should_notify: z.boolean(),
+  notifier_signature: z.string().optional(),
 });
 
 export type CandidateInput = z.input<typeof CandidateSchema>;

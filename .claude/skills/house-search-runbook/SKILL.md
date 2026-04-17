@@ -202,15 +202,21 @@ reject. The rubric is intentionally strict — false negatives beat false positi
   "appliance_review": "complete|partial|missing",
   "appliances_seen": ["air_conditioner", ...],
   "appliances_missing_or_unknown": ["washing_machine", ...],
-  "recommendation_reason": "[由 Claude 自動檢查] <one short sentence on why it matched — start with a bracketed self-attribution so the LINE recipient knows an AI sent the message. If you are a different model, use your own name instead of Claude.>",
+  "recommendation_reason": "<one short sentence on why it matched>",
   "concerns": ["<short concern>", "..."],
   "change_type": "new_listing",
-  "should_notify": true
+  "should_notify": true,
+  "notifier_signature": "由 Claude 自動檢查並通知"
 }
 ```
 
 `change_type` is advisory to the dedup hash — leave it `"new_listing"` unless you're
 explicitly tracking a `price_drop` or similar.
+
+`notifier_signature` is the last line the LINE recipient sees (rendered as
+`— <signature>`). Set it to identify yourself: e.g. `"由 Claude 自動檢查並通知"`,
+or if you are a different model, substitute your own name. This keeps the server
+free of any hardcoded model name.
 
 ### 7. Notify via MCP
 
