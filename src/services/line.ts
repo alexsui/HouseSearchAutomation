@@ -7,14 +7,15 @@ export interface LineResult {
 
 export async function pushLineMessage(text: string): Promise<LineResult> {
   const env = loadServerEnv();
-  const res = await fetch("https://api.line.me/v2/bot/message/push", {
+  // Broadcast → sends to every user who added the bot as a friend. Counted per
+  // recipient against the monthly quota, same as /push.
+  const res = await fetch("https://api.line.me/v2/bot/message/broadcast", {
     method: "POST",
     headers: {
       "content-type": "application/json",
       authorization: `Bearer ${env.LINE_CHANNEL_ACCESS_TOKEN}`,
     },
     body: JSON.stringify({
-      to: env.LINE_USER_ID,
       messages: [{ type: "text", text }],
     }),
   });

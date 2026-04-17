@@ -38,7 +38,7 @@ describe("handleSendLineNotification", () => {
     });
     expect(out.status).toBe("sent");
     const lineCalls = fetchMock.mock.calls.filter(
-      ([url]) => String(url) === "https://api.line.me/v2/bot/message/push",
+      ([url]) => String(url) === "https://api.line.me/v2/bot/message/broadcast",
     );
     expect(lineCalls).toHaveLength(1);
   });
@@ -64,6 +64,19 @@ describe("handleSendLineNotification", () => {
         message_body: up.message_body!,
       }),
     ).rejects.toThrow(/already sent/);
+  });
+
+  it("standalone push (message_body only) skips DB and returns null id", async () => {
+    const fetchMock = mockFetchOk();
+    const out = await handleSendLineNotification({
+      message_body: "standalone test",
+    });
+    expect(out.status).toBe("sent");
+    expect(out.notification_id).toBeNull();
+    const lineCalls = fetchMock.mock.calls.filter(
+      ([url]) => String(url) === "https://api.line.me/v2/bot/message/broadcast",
+    );
+    expect(lineCalls).toHaveLength(1);
   });
 
   it("records failed notification on LINE API error", async () => {

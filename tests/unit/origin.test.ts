@@ -8,7 +8,6 @@ beforeEach(() => {
   process.env.SUPABASE_URL = "https://x.supabase.co";
   process.env.SUPABASE_SERVICE_ROLE_KEY = "k";
   process.env.LINE_CHANNEL_ACCESS_TOKEN = "t";
-  process.env.LINE_USER_ID = "U";
   process.env.AUTOMATION_SECRET = "0".repeat(32);
 });
 
