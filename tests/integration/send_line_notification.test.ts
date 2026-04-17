@@ -94,10 +94,10 @@ describe("handleSendLineNotification", () => {
 
     const body = JSON.parse((lineCalls[0]![1] as RequestInit).body as string);
     const text = body.messages[0].text as string;
-    expect(text).toContain(`Title: ${validCandidate.title}`);
-    expect(text).toContain("Budget band: strong");
+    expect(text).toContain(`標題：${validCandidate.title}`);
+    expect(text).toContain("預算分級：強力推薦");
     expect(text).toContain(
-      `591: ${validCandidate.listing_identity.source_url}`,
+      `591：${validCandidate.listing_identity.source_url}`,
     );
   });
 

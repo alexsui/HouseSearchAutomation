@@ -5,20 +5,20 @@ import { validCandidate } from "../fixtures/candidates";
 const triageUrl = "https://app.example.com/listings/abc123";
 
 describe("renderMessage", () => {
-  it("renders a new_listing message with all required fields", () => {
+  it("renders a new_listing message with all required fields in Traditional Chinese", () => {
     const msg = renderMessage({
       event_type: "new_listing",
       candidate: validCandidate,
       triage_url: triageUrl,
     });
-    expect(msg).toContain("[New Listing]");
+    expect(msg).toContain("[新物件]");
     expect(msg).toContain("Shilin");
-    expect(msg).toContain("TWD 25,000");
-    expect(msg).toContain("Layout: 2房1廳1衛");
-    expect(msg).toContain("Budget band: strong");
-    expect(msg).toContain(`Title: ${validCandidate.title}`);
-    expect(msg).toContain("Seen: air_conditioner, refrigerator");
-    expect(msg).toContain("Unknown: washing_machine, water_heater");
+    expect(msg).toContain("NT$25,000");
+    expect(msg).toContain("格局：2房1廳1衛");
+    expect(msg).toContain("預算分級：強力推薦");
+    expect(msg).toContain(`標題：${validCandidate.title}`);
+    expect(msg).toContain("已見：冷氣、冰箱");
+    expect(msg).toContain("未確認：洗衣機、熱水器");
     expect(msg).toContain(triageUrl);
     expect(msg).toContain(validCandidate.listing_identity.source_url);
   });
@@ -30,7 +30,7 @@ describe("renderMessage", () => {
       triage_url: triageUrl,
       price_drop: { previous: 28000, current: 25000 },
     });
-    expect(msg).toContain("[Price Drop]");
+    expect(msg).toContain("[降價]");
     expect(msg).toContain("28,000");
     expect(msg).toContain("25,000");
   });
@@ -41,6 +41,6 @@ describe("renderMessage", () => {
       candidate: { ...validCandidate, photo_review: "poor" },
       triage_url: triageUrl,
     });
-    expect(msg).toContain("HIGH CONCERN");
+    expect(msg).toContain("⚠ 高度警示");
   });
 });

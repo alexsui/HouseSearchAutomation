@@ -1,13 +1,43 @@
 import type { Candidate, ChangeType } from "./types";
 
 const HEADER: Record<Exclude<ChangeType, "none">, string> = {
-  new_listing: "New Listing",
-  price_drop: "Price Drop",
-  relisted: "Relisted",
-  became_candidate: "Now a Candidate",
-  material_listing_change: "Listing Updated",
-  review_change: "Review Updated",
+  new_listing: "新物件",
+  price_drop: "降價",
+  relisted: "重新上架",
+  became_candidate: "成為候選",
+  material_listing_change: "物件更新",
+  review_change: "評估更新",
 };
+
+const SCORE_LEVEL_ZH: Record<Candidate["score_level"], string> = {
+  strong: "強力推薦",
+  normal: "一般",
+  loose: "寬鬆",
+  reject: "拒絕",
+};
+
+const PHOTO_REVIEW_ZH: Record<Candidate["photo_review"], string> = {
+  acceptable: "可接受",
+  needs_review: "待確認",
+  poor: "不佳",
+};
+
+const APPLIANCE_REVIEW_ZH: Record<Candidate["appliance_review"], string> = {
+  complete: "完整",
+  partial: "部分",
+  missing: "缺少",
+};
+
+const APPLIANCE_ZH: Record<string, string> = {
+  air_conditioner: "冷氣",
+  refrigerator: "冰箱",
+  washing_machine: "洗衣機",
+  water_heater: "熱水器",
+};
+
+function zhAppliances(list: readonly string[]): string {
+  return list.map((a) => APPLIANCE_ZH[a] ?? a).join("、");
+}
 
 export interface RenderInput {
   event_type: Exclude<ChangeType, "none">;
@@ -19,36 +49,36 @@ export interface RenderInput {
 export function renderMessage(input: RenderInput): string {
   const { event_type, candidate, triage_url, price_drop } = input;
   const c = candidate;
-  const header = `[${HEADER[event_type]}] ${c.district} ${c.layout.split("房")[0]}BR TWD ${fmt(c.rent_price)}`;
+  const header = `[${HEADER[event_type]}] ${c.district} ${c.layout.split("房")[0]}房 NT$${fmt(c.rent_price)}`;
 
-  const lines: string[] = [header, "", `Title: ${c.title}`];
+  const lines: string[] = [header, "", `標題：${c.title}`];
 
   if (event_type === "price_drop" && price_drop) {
-    lines.push(`Rent: TWD ${fmt(price_drop.current)}/month (was TWD ${fmt(price_drop.previous)})`);
+    lines.push(`租金：NT$${fmt(price_drop.current)}/月 (原 NT$${fmt(price_drop.previous)})`);
   } else {
-    lines.push(`Rent: TWD ${fmt(c.rent_price)}/month`);
+    lines.push(`租金：NT$${fmt(c.rent_price)}/月`);
   }
 
   lines.push(
-    `District: ${c.district}`,
-    `Layout: ${c.layout}`,
-    `Area: ${c.area_ping ?? "?"} ping`,
-    `Floor: ${c.floor ?? "?"}`,
-    `Budget band: ${c.score_level}`,
-    `Photo review: ${c.photo_review}`,
-    `Appliance review: ${c.appliance_review}`,
+    `區域：${c.district}`,
+    `格局：${c.layout}`,
+    `坪數：${c.area_ping ?? "?"} 坪`,
+    `樓層：${c.floor ?? "?"}`,
+    `預算分級：${SCORE_LEVEL_ZH[c.score_level]}`,
+    `照片評估：${PHOTO_REVIEW_ZH[c.photo_review]}`,
+    `家電評估：${APPLIANCE_REVIEW_ZH[c.appliance_review]}`,
   );
 
-  if (c.appliances_seen.length > 0) lines.push(`Seen: ${c.appliances_seen.join(", ")}`);
+  if (c.appliances_seen.length > 0) lines.push(`已見：${zhAppliances(c.appliances_seen)}`);
   if (c.appliances_missing_or_unknown.length > 0)
-    lines.push(`Unknown: ${c.appliances_missing_or_unknown.join(", ")}`);
+    lines.push(`未確認：${zhAppliances(c.appliances_missing_or_unknown)}`);
 
-  if (c.recommendation_reason) lines.push(`Why it is worth checking: ${c.recommendation_reason}`);
-  if (c.concerns.length > 0) lines.push(`Concerns: ${c.concerns.join("; ")}`);
+  if (c.recommendation_reason) lines.push(`推薦理由：${c.recommendation_reason}`);
+  if (c.concerns.length > 0) lines.push(`注意事項：${c.concerns.join("；")}`);
 
-  if (c.photo_review === "poor") lines.push("⚠ HIGH CONCERN: photos look poor; confirm manually");
+  if (c.photo_review === "poor") lines.push("⚠ 高度警示：照片狀況不佳，建議手動確認");
 
-  lines.push(`591: ${c.listing_identity.source_url}`, `Triage: ${triage_url}`);
+  lines.push(`591：${c.listing_identity.source_url}`, `詳情頁：${triage_url}`);
   return lines.join("\n");
 }
 
