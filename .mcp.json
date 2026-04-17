@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "house-search-mcp": {
+      "type": "http",
+      "url": "https://house-search-automation.vercel.app/api/mcp/${AUTOMATION_SECRET}"
+    }
+  }
+}
