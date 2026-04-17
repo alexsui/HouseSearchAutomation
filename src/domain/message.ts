@@ -78,7 +78,12 @@ export function renderMessage(input: RenderInput): string {
 
   if (c.photo_review === "poor") lines.push("⚠ 高度警示：照片狀況不佳，建議手動確認");
 
-  lines.push(`591：${c.listing_identity.source_url}`, `詳情頁：${triage_url}`);
+  lines.push(
+    `591：${c.listing_identity.source_url}`,
+    `詳情頁：${triage_url}`,
+    "",
+    "— 由 Claude 自動檢查並通知",
+  );
   return lines.join("\n");
 }
 

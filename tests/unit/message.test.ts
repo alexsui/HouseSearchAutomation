@@ -21,6 +21,7 @@ describe("renderMessage", () => {
     expect(msg).toContain("未確認：洗衣機、熱水器");
     expect(msg).toContain(triageUrl);
     expect(msg).toContain(validCandidate.listing_identity.source_url);
+    expect(msg).toContain("— 由 Claude 自動檢查並通知");
   });
 
   it("renders a price_drop message with price delta", () => {
