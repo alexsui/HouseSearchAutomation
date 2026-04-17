@@ -2,7 +2,9 @@ import { getServerClient } from "@/services/supabase";
 
 export interface NotificationRow {
   id: string;
-  listing_id: string;
+  listing_id: string | null;
+  source: string | null;
+  source_listing_id: string | null;
   event_type: string;
   event_hash: string;
   channel: string;
@@ -31,8 +33,30 @@ export async function hasPriorSentNotification(
   return (data?.length ?? 0) > 0;
 }
 
+export async function hasPriorSourceNotification(
+  source: string,
+  sourceListingId: string,
+  eventType: string,
+  eventHash: string,
+): Promise<boolean> {
+  const supabase = getServerClient();
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("id")
+    .eq("source", source)
+    .eq("source_listing_id", sourceListingId)
+    .eq("event_type", eventType)
+    .eq("event_hash", eventHash)
+    .eq("status", "sent")
+    .limit(1);
+  if (error) throw new Error(`hasPriorSourceNotification failed: ${error.message}`);
+  return (data?.length ?? 0) > 0;
+}
+
 export async function insertNotification(input: {
-  listing_id: string;
+  listing_id?: string | null;
+  source?: string | null;
+  source_listing_id?: string | null;
   event_type: string;
   event_hash: string;
   message_body: string;
@@ -41,9 +65,21 @@ export async function insertNotification(input: {
 }): Promise<NotificationRow> {
   const supabase = getServerClient();
   const sent_at = input.status === "sent" ? new Date().toISOString() : null;
+  const row = {
+    listing_id: input.listing_id ?? null,
+    source: input.source ?? null,
+    source_listing_id: input.source_listing_id ?? null,
+    event_type: input.event_type,
+    event_hash: input.event_hash,
+    message_body: input.message_body,
+    status: input.status,
+    provider_response: input.provider_response,
+    channel: "line",
+    sent_at,
+  };
   const { data, error } = await supabase
     .from("notifications")
-    .insert({ ...input, channel: "line", sent_at })
+    .insert(row)
     .select()
     .single();
   if (error) throw new Error(`insertNotification failed: ${error.message}`);
