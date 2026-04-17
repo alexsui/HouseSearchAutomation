@@ -1,14 +1,10 @@
-- name: taipei_main
+- name: taipei_main_newest
   priority: 1
-  districts: [Neihu, Nangang, Shilin, Beitou, Songshan, Zhishan, Mingde, Shipai, Dazhi, Jiannan]
+  districts: [Neihu, Nangang, Shilin, Beitou, Zhishan, Mingde, Shipai]
   search_urls:
-    - https://rent.591.com.tw/list?region=1&section=10,8,11,3,4&kind=1&price=20000_30000&layout=2&other=cook
+    - https://rent.591.com.tw/list?region=1&section=10,8,11,3&sort=posttime_desc
   note: >
-    Single consolidated Taipei URL covering the five core districts
-    (內湖, 南港, 士林, 北投, 松山 — section=10,8,11,3,4). Filters:
-    kind=1 (整層住家), layout=2 (2-bedroom), price 20k-30k, other=cook
-    (has kitchen). Station areas inside these districts (Zhishan, Mingde,
-    Shipai, Dazhi, Jiannan) are whitelisted for detail-page district
-    matching. Xizhi is intentionally excluded from this URL — add a
-    separate Xizhi URL only if you want the Neihu-border proximity rule
-    to be exercised, and filter accordingly in the detail step.
+    Taipei — Neihu + Nangang + Shilin + Beitou (section=10,8,11,3),
+    sorted newest-first (posttime_desc). No price / layout / kind /
+    other filters — the agent's rubric handles that server-side.
+    Process only the FIRST 30 listings per run (see SKILL.md step 2).

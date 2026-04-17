@@ -88,9 +88,14 @@ EVALEOF
 591 listing detail URLs are bare-id: `https://rent.591.com.tw/<id>`. NOT `/home/<id>` or
 `/rent/<id>` — those are unrelated marketing pages.
 
-You don't need a local dedup step. Every listing goes through the pipeline; the server
-dedupes at the notify boundary. That does mean you open each detail page once per run —
-that's fine hourly.
+**Cap: process only the first 30 listing IDs returned by the search page.** The search URL is
+sorted newest-first (`sort=posttime_desc`), so the first 30 are the newest postings. This
+keeps each hourly run under ~15 minutes. Skip everything beyond index 30, even if the
+scroll loaded more.
+
+You don't need a local dedup step. Every listing in the top-30 goes through the pipeline;
+the server dedupes at the notify boundary. Repeated listings return `already_sent` and cost
+one cheap DB check — no LINE fire, no wasted time on re-rendering the message.
 
 ### 3. For each listing: open detail page and extract fields
 
@@ -133,27 +138,48 @@ set `photo_review = needs_review`.
 
 ### 5. Apply the rubric
 
-Photo review:
-- `acceptable`: clear indoor photos, normal lighting, clean enough, basic living condition visible.
+Photo review (evaluate by what is actually VISIBLE in the photos — ignore
+description-only claims):
+- `acceptable`: clear indoor photos, normal lighting, clean enough, basic living condition
+  visible — furniture and basic appliances actually seen in the rooms.
 - `needs_review`: too few photos, incomplete angles, insufficient lighting, unclear rooms.
 - `poor`: dirty, damp, moldy, leaky, very dark, severely outdated, heavily cluttered,
-  only exterior/floor-plan images, or empty without basic equipment.
+  only exterior / community / floor-plan images, **or empty-shell / ghost-house — no
+  furniture or no basic appliances visible, even if the listing text claims they are
+  included**. Treat "text says included but photos show nothing" as `poor`, not `partial`.
 
-Required appliances: air_conditioner, refrigerator, washing_machine, water_heater.
+Required appliances: air_conditioner, refrigerator, washing_machine, water_heater. A photo
+must visibly show the appliance (description-only evidence is NOT enough to bump beyond
+`partial`).
 
 Appliance review:
-- `complete`: all four visible in photos or explicitly listed in the description.
-- `partial`: some visible or described; others unknown.
+- `complete`: all four visible in the photos.
+- `partial`: some visible, others only described.
 - `missing`: one or more clearly absent OR the listing states "no basic appliances".
 
 Score level:
-- `strong`: rent ≤ 25,000 AND 2-bedroom whole-floor AND photos/appliances acceptable.
-- `normal`: 25,001–28,000, 2-bedroom whole-floor, reasonable condition.
-- `loose`: 28,001–30,000, 2-bedroom whole-floor, AND a clear advantage.
-- `reject`: any hard-rule violation, not 2-bedroom whole-floor, rooftop addition, Xizhi
-  without Neihu-border proximity, poor photos AND missing appliances, or above 30,000 TWD.
+- `strong`: rent ≤ 25,000 AND 2-bedroom whole-floor AND `photo_review=acceptable` AND
+  `appliance_review=complete`.
+- `normal`: 25,001–28,000, 2-bedroom whole-floor, `photo_review=acceptable`, and
+  `appliance_review` is `complete` or `partial` (if `partial`, add a concern about the
+  unconfirmed appliances).
+- `loose`: 28,001–30,000, 2-bedroom whole-floor, `photo_review=acceptable`,
+  `appliance_review=complete`, AND a clear advantage (location, great photos, etc.).
+- `reject` (ANY of the following):
+  - not 2-bedroom whole-floor (i.e. 1房1廳, 套房, 雅房, or 3房+ split into singles),
+  - rooftop addition / 頂樓加蓋 / 頂層加蓋,
+  - Xizhi without clear Neihu-border proximity,
+  - above 30,000 TWD,
+  - `photo_review=poor` (empty shell, ghost house, dirty, leaky, exterior-only, etc.),
+  - `photo_review=needs_review` AND `appliance_review != complete` (we can't confirm
+    livability AND we can't confirm appliances — don't spam the user; user would rather
+    miss a candidate than get an empty-shell notification).
 
-If `score_level=reject`: skip the notify call entirely, move to the next listing.
+If `score_level=reject`: skip the notify call entirely. Move to the next listing.
+
+**Guiding principle:** the user has explicitly said no ghost-house / empty-shell
+notifications, and wants appliances visible. If the photos don't prove basic livability,
+reject. The rubric is intentionally strict — false negatives beat false positives.
 
 ### 6. Build the Candidate JSON
 

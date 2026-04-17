@@ -26,7 +26,7 @@ describe("handleUpsertListing", () => {
     expect(result.should_notify).toBe(true);
     expect(result.event_type).toBe("new_listing");
     expect(result.event_hash).toMatch(/^[0-9a-f]{64}$/);
-    expect(result.message_body).toContain("[New Listing]");
+    expect(result.message_body).toContain("[新物件]");
   });
 
   it("returns should_notify=false on repeat call with no change", async () => {
@@ -57,7 +57,7 @@ describe("handleUpsertListing", () => {
     });
     expect(second.should_notify).toBe(true);
     expect(second.event_type).toBe("price_drop");
-    expect(second.message_body).toContain("[Price Drop]");
+    expect(second.message_body).toContain("[降價]");
   });
 
   it("rejects invalid candidate", async () => {

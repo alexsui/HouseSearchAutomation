@@ -32,10 +32,17 @@ export async function fetchCandidateList(
   const { data: notified, error: notifiedErr } = await supabase
     .from("notifications")
     .select("listing_id, sent_at")
-    .eq("status", "sent");
+    .eq("status", "sent")
+    .not("listing_id", "is", null);
   if (notifiedErr) throw new Error(notifiedErr.message);
 
-  const ids = Array.from(new Set((notified ?? []).map((n) => n.listing_id)));
+  const ids = Array.from(
+    new Set(
+      (notified ?? [])
+        .map((n) => n.listing_id)
+        .filter((id): id is string => typeof id === "string"),
+    ),
+  );
   if (ids.length === 0) return [];
 
   const lastNotifiedByListing = new Map<string, string>();
