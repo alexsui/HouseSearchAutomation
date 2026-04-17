@@ -1,0 +1,17 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+.vercel/
+.turbo/
+*.tsbuildinfo
+
+.superpowers/
