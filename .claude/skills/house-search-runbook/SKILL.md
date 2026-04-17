@@ -202,7 +202,7 @@ reject. The rubric is intentionally strict — false negatives beat false positi
   "appliance_review": "complete|partial|missing",
   "appliances_seen": ["air_conditioner", ...],
   "appliances_missing_or_unknown": ["washing_machine", ...],
-  "recommendation_reason": "<one short sentence on why it matched>",
+  "recommendation_reason": "[由 Claude 自動檢查] <one short sentence on why it matched — start with a bracketed self-attribution so the LINE recipient knows an AI sent the message. If you are a different model, use your own name instead of Claude.>",
   "concerns": ["<short concern>", "..."],
   "change_type": "new_listing",
   "should_notify": true
