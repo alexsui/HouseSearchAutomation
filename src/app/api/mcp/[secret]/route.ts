@@ -1,5 +1,4 @@
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-import { createMcpHandler, withMcpAuth } from "mcp-handler";
+import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
 import { loadServerEnv } from "@/config/env";
 import { handleUpsertListing } from "@/mcp/handlers/upsert_listing";
@@ -67,16 +66,15 @@ const handler = createMcpHandler(
   { basePath: "/api", maxDuration: 60, verboseLogs: false },
 );
 
-const verifyToken = async (
-  _req: Request,
-  bearerToken?: string,
-): Promise<AuthInfo | undefined> => {
-  if (!bearerToken) return undefined;
+async function route(req: Request, ctx: { params: Promise<{ secret: string }> }): Promise<Response> {
+  const { secret } = await ctx.params;
   const env = loadServerEnv();
-  if (bearerToken !== env.AUTOMATION_SECRET) return undefined;
-  return { token: bearerToken, scopes: ["mcp:call"], clientId: "house-search-runner" };
-};
+  if (secret !== env.AUTOMATION_SECRET) return new Response(null, { status: 401 });
 
-const authed = withMcpAuth(handler, verifyToken, { required: true });
+  const url = new URL(req.url);
+  url.pathname = "/api/mcp";
+  const rewritten = new Request(url.toString(), req);
+  return handler(rewritten);
+}
 
-export { authed as GET, authed as POST };
+export { route as GET, route as POST };
