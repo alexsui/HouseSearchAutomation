@@ -6,7 +6,6 @@ describe("loadServerEnv", () => {
     SUPABASE_URL: "https://x.supabase.co",
     SUPABASE_SERVICE_ROLE_KEY: "k",
     LINE_CHANNEL_ACCESS_TOKEN: "t",
-    LINE_USER_ID: "U123",
     AUTOMATION_SECRET: "s-at-least-sixteen-chars",
     TRIAGE_PASSWORD: "hunter2-long-enough",
     NEXT_PUBLIC_SITE_URL: "http://localhost:3000",

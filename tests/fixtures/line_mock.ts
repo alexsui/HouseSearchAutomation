@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-const LINE_URL = "https://api.line.me/v2/bot/message/push";
+const LINE_URL = "https://api.line.me/v2/bot/message/broadcast";
 
 function wrap(
   handler: (url: string, init?: RequestInit) => Response,

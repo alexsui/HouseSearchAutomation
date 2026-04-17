@@ -120,8 +120,11 @@ For each group, for each URL in `search_urls`:
   - `layout` — 591 uses `2房1廳1衛` style; copy it verbatim
   - `area_ping` — integer or decimal, null if unclear
   - `floor` — `4F/5F` style or null
-  - `image_urls` — the listing's photo URLs (up to 10). Look at `<img src>`,
-    `srcset`, and any `data-src` attributes inside the gallery container.
+  - `image_urls` — the listing's photo URLs (up to 10). 591 photo URLs match
+    `^https://img[12]\.591\.com\.tw/house/` — use that regex when selecting
+    `<img src>` / `srcset` / `data-src` attributes. Once the detail page
+    settles at `networkidle`, the first ~5 gallery `<img>` nodes have their
+    `src` populated without needing to click the gallery.
 
 ### 5. Download and inspect photos
 

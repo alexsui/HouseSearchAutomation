@@ -38,7 +38,7 @@ describe("handleSendLineNotification", () => {
     });
     expect(out.status).toBe("sent");
     const lineCalls = fetchMock.mock.calls.filter(
-      ([url]) => String(url) === "https://api.line.me/v2/bot/message/push",
+      ([url]) => String(url) === "https://api.line.me/v2/bot/message/broadcast",
     );
     expect(lineCalls).toHaveLength(1);
   });
