@@ -21,7 +21,7 @@ export function renderMessage(input: RenderInput): string {
   const c = candidate;
   const header = `[${HEADER[event_type]}] ${c.district} ${c.layout.split("房")[0]}BR TWD ${fmt(c.rent_price)}`;
 
-  const lines: string[] = [header, ""];
+  const lines: string[] = [header, "", `Title: ${c.title}`];
 
   if (event_type === "price_drop" && price_drop) {
     lines.push(`Rent: TWD ${fmt(price_drop.current)}/month (was TWD ${fmt(price_drop.previous)})`);
@@ -34,7 +34,7 @@ export function renderMessage(input: RenderInput): string {
     `Layout: ${c.layout}`,
     `Area: ${c.area_ping ?? "?"} ping`,
     `Floor: ${c.floor ?? "?"}`,
-    `Level: ${c.score_level}`,
+    `Budget band: ${c.score_level}`,
     `Photo review: ${c.photo_review}`,
     `Appliance review: ${c.appliance_review}`,
   );

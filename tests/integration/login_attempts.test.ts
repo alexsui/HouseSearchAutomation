@@ -26,21 +26,27 @@ describe("login throttle", () => {
   });
 
   it("is not throttled when under the limit", async () => {
-    for (let i = 0; i < THROTTLE_MAX - 1; i++) await recordAttempt("abc", false);
+    await Promise.all(
+      Array.from({ length: THROTTLE_MAX - 1 }, () => recordAttempt("abc", false)),
+    );
     expect(await isIpThrottled("abc")).toBe(false);
   });
 
   it("is throttled at the limit within the window", async () => {
-    for (let i = 0; i < THROTTLE_MAX; i++) await recordAttempt("abc", false);
+    await Promise.all(
+      Array.from({ length: THROTTLE_MAX }, () => recordAttempt("abc", false)),
+    );
     expect(await isIpThrottled("abc")).toBe(true);
   });
 
   it("ignores attempts outside the window", async () => {
     const supabase = getServerClient();
     const past = new Date(Date.now() - (THROTTLE_WINDOW_SECONDS + 60) * 1000).toISOString();
-    for (let i = 0; i < THROTTLE_MAX; i++) {
-      await supabase.from("login_attempts").insert({ ip_hash: "abc", success: false, attempted_at: past });
-    }
+    await Promise.all(
+      Array.from({ length: THROTTLE_MAX }, () =>
+        supabase.from("login_attempts").insert({ ip_hash: "abc", success: false, attempted_at: past }),
+      ),
+    );
     expect(await isIpThrottled("abc")).toBe(false);
   });
 });

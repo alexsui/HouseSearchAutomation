@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vite
 import { config } from "dotenv";
 import { getServerClient, resetClientForTests } from "@/services/supabase";
 import { loadServerEnv } from "@/config/env";
-import { POST } from "@/app/api/mcp/route";
+import { POST } from "@/app/api/mcp/[secret]/route";
 import { mockFetchOk } from "../fixtures/line_mock";
 
 beforeAll(() => {
@@ -18,11 +18,10 @@ beforeEach(async () => {
 
 afterEach(() => vi.unstubAllGlobals());
 
-function initializeRequest(token: string) {
-  return new Request("http://localhost/api/mcp", {
+function mcpRequest(secret: string) {
+  return new Request(`http://localhost/api/mcp/${secret}`, {
     method: "POST",
     headers: {
-      authorization: `Bearer ${token}`,
       "content-type": "application/json",
       accept: "application/json, text/event-stream",
     },
@@ -35,25 +34,20 @@ function initializeRequest(token: string) {
   });
 }
 
-describe("/api/mcp route", () => {
-  it("rejects requests without bearer token", async () => {
-    const req = new Request("http://localhost/api/mcp", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
-    });
-    const res = await POST(req);
+function routeCtx(secret: string) {
+  return { params: Promise.resolve({ secret }) };
+}
+
+describe("/api/mcp/[secret] route", () => {
+  it("rejects requests with wrong secret", async () => {
+    const res = await POST(mcpRequest("wrong-secret"), routeCtx("wrong-secret"));
     expect(res.status).toBe(401);
   });
 
-  it("rejects wrong bearer token", async () => {
-    const res = await POST(initializeRequest("wrong-token"));
-    expect(res.status).toBe(401);
-  });
-
-  it("lists the three tools when authenticated", async () => {
+  it("lists the three tools when secret matches", async () => {
     mockFetchOk();
-    const res = await POST(initializeRequest(process.env.AUTOMATION_SECRET!));
+    const secret = process.env.AUTOMATION_SECRET!;
+    const res = await POST(mcpRequest(secret), routeCtx(secret));
     expect(res.status).toBe(200);
     const body = parseMcpResponse(await res.text());
     const names = body.result.tools.map((t: { name: string }) => t.name);

@@ -15,7 +15,8 @@ describe("renderMessage", () => {
     expect(msg).toContain("Shilin");
     expect(msg).toContain("TWD 25,000");
     expect(msg).toContain("Layout: 2房1廳1衛");
-    expect(msg).toContain("Level: strong");
+    expect(msg).toContain("Budget band: strong");
+    expect(msg).toContain(`Title: ${validCandidate.title}`);
     expect(msg).toContain("Seen: air_conditioner, refrigerator");
     expect(msg).toContain("Unknown: washing_machine, water_heater");
     expect(msg).toContain(triageUrl);
