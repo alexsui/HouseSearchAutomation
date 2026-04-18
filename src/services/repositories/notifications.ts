@@ -36,17 +36,16 @@ export async function hasPriorSentNotification(
 export async function hasPriorSourceNotification(
   source: string,
   sourceListingId: string,
-  eventType: string,
-  eventHash: string,
 ): Promise<boolean> {
+  // URL-only dedup: any prior successful notification for this listing —
+  // regardless of event_type / event_hash / rent — blocks further notifies.
+  // One LINE per listing, forever. Simpler than hashing and avoids drift.
   const supabase = getServerClient();
   const { data, error } = await supabase
     .from("notifications")
     .select("id")
     .eq("source", source)
     .eq("source_listing_id", sourceListingId)
-    .eq("event_type", eventType)
-    .eq("event_hash", eventHash)
     .eq("status", "sent")
     .limit(1);
   if (error) throw new Error(`hasPriorSourceNotification failed: ${error.message}`);
