@@ -102,8 +102,6 @@ async function structuredNotify(input: {
   const already = await hasPriorSourceNotification(
     candidate.listing_identity.source,
     candidate.listing_identity.source_listing_id,
-    event_type,
-    event_hash,
   );
   if (already) {
     return { status: "already_sent", notification_id: null };
