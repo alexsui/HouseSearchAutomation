@@ -85,15 +85,17 @@ async function structuredNotify(input: {
     return { status: "already_sent", notification_id: null };
   }
 
+  // Dedup key stays STABLE across re-evaluations of the same listing:
+  // only identity + rent_price. score_level / photo_review / appliance_review
+  // are subjective agent judgments and will drift between runs, which would
+  // defeat the dedup (same listing fires twice because the hash differs).
+  // Only actual rent changes should produce a new event_hash → new notify.
   const event_hash = computeEventHash({
     event_type,
     source: candidate.listing_identity.source,
     source_listing_id: candidate.listing_identity.source_listing_id,
     payload: {
       rent_price: candidate.rent_price,
-      score_level: candidate.score_level,
-      photo_review: candidate.photo_review,
-      appliance_review: candidate.appliance_review,
     },
   });
 
