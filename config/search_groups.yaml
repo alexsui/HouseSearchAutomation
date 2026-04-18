@@ -2,9 +2,11 @@
   priority: 1
   districts: [Neihu, Nangang, Shilin, Beitou, Zhishan, Mingde, Shipai]
   search_urls:
-    - https://rent.591.com.tw/list?region=1&section=10,8,11,3&sort=posttime_desc
+    - https://rent.591.com.tw/list?region=1&section=10,8,11,3&kind=1&price=20000_30000&layout=2&other=cook&sort=posttime_desc
   note: >
     Taipei — Neihu + Nangang + Shilin + Beitou (section=10,8,11,3),
-    sorted newest-first (posttime_desc). No price / layout / kind /
-    other filters — the agent's rubric handles that server-side.
-    Process only the FIRST 30 listings per run (see SKILL.md step 2).
+    sorted newest-first (posttime_desc). Filters: kind=1 (整層住家),
+    layout=2 (2-bedroom), price 20k-30k, other=cook (has kitchen).
+    Process only the FIRST 30 listings per run. Agent rubric still
+    applies district whitelist at the detail-page step for station-level
+    filtering (e.g. avoid 社子島 in Shilin).
