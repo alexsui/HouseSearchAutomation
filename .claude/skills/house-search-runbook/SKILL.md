@@ -51,6 +51,12 @@ delivery.
 6. **Xizhi proximity gate.** For any listing in a Xizhi-targeted group, include it ONLY if
    the public listing info (address, nearby-station text, street name) makes it clearly very
    close to the Neihu border (≈500m–1km). If uncertain, reject.
+6a. **Sanchong 台北橋 proximity gate.** For any listing in the `sanchong_taipei_bridge` group
+   (新北市三重區), include ONLY if the listing is clearly within ~1km walking distance of
+   台北橋站 (Orange line 中和新蘆線). Positive signals: explicit "台北橋站" / "台北橋 X 分鐘"
+   mention, or address on 重新路一段/二段, 正義北路, 中央北路, 三和路一段, near 淡水河 / 大同區
+   side. REJECT if the nearest MRT is 菜寮 / 三重 / 先嗇宮 / 三重國小 / 湯城 / 重陽 / 集美 —
+   those are too far west. Uncertain → reject.
 7. **Call MCP for every LINE notification.** Never push to LINE directly.
 8. **Trust the server's dedup.** If `send_line_notification` returns `already_sent`, the
    server has already notified for this (source_listing_id, event_type, event_hash) combo.
@@ -91,10 +97,15 @@ EVALEOF
 591 listing detail URLs are bare-id: `https://rent.591.com.tw/<id>`. NOT `/home/<id>` or
 `/rent/<id>` — those are unrelated marketing pages.
 
-**Cap: process only the first 30 listing IDs returned by the search page.** The search URL is
-sorted newest-first (`sort=posttime_desc`), so the first 30 are the newest postings. This
-keeps each hourly run under ~15 minutes. Skip everything beyond index 30, even if the
-scroll loaded more.
+**Cap: process only the first N listing IDs returned by each search page**,
+where N is per-group:
+- `taipei_main_newest`: first **30**
+- `sanchong_taipei_bridge`: first **15** (proximity-gated exploration group, most
+  listings will fail the 台北橋 gate anyway)
+
+All search URLs are sorted newest-first (`sort=posttime_desc`), so the first N
+are the newest postings. Skip everything beyond index N, even if the scroll
+loaded more.
 
 You don't need a local dedup step. Every listing in the top-30 goes through the pipeline;
 the server dedupes at the notify boundary. Repeated listings return `already_sent` and cost
