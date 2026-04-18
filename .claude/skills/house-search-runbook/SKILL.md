@@ -45,6 +45,9 @@ delivery.
 5. **Reject rooftop additions.** If title or description includes 頂樓加蓋 / 頂層加蓋 / rooftop
    addition / illegal-looking roof extension, set `score_level=reject` — even if the price
    is attractive.
+5a. **Reject ground floor (1F / 一樓).** If the `floor` field is `1F` or the title / description
+   says 一樓 / 1樓 / 平面 / 透天1F, set `score_level=reject`. Privacy and noise concern. This
+   includes "1F/2F" style listings where the unit itself is on 1F. Basement (B1) also reject.
 6. **Xizhi proximity gate.** For any listing in a Xizhi-targeted group, include it ONLY if
    the public listing info (address, nearby-station text, street name) makes it clearly very
    close to the Neihu border (≈500m–1km). If uncertain, reject.
@@ -168,6 +171,7 @@ Score level:
 - `reject` (ANY of the following):
   - not 2-bedroom whole-floor (i.e. 1房1廳, 套房, 雅房, or 3房+ split into singles),
   - rooftop addition / 頂樓加蓋 / 頂層加蓋,
+  - **ground floor / 1F / 一樓 / 1樓 / B1 / basement**,
   - Xizhi without clear Neihu-border proximity,
   - above 30,000 TWD,
   - `photo_review=poor` (empty shell, ghost house, dirty, leaky, exterior-only, etc.),
