@@ -15,7 +15,6 @@ import { hasPriorSentNotification } from "@/services/repositories/notifications"
 export interface UpsertListingInput {
   candidate: Candidate;
   run_id: string;
-  triage_base_url: string;
 }
 
 export interface UpsertListingResult {
@@ -127,11 +126,9 @@ export async function handleUpsertListing(
     };
   }
 
-  const triage_url = `${input.triage_base_url.replace(/\/$/, "")}/listings/${listing.id}`;
   const message_body = renderMessage({
     event_type: chosen.change_type,
     candidate,
-    triage_url,
     price_drop:
       chosen.change_type === "price_drop"
         ? {

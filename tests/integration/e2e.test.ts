@@ -16,6 +16,7 @@ beforeAll(() => {
 
 beforeEach(async () => {
   const supabase = getServerClient();
+  await supabase.from("notifications").delete().eq("source", "591");
   await supabase.from("listings").delete().eq("source", "591");
 });
 
@@ -29,15 +30,12 @@ describe("end-to-end agent flow", () => {
     const first = await handleUpsertListing({
       candidate: validCandidate,
       run_id: "r1",
-      triage_base_url: "https://app.example.com",
     });
     expect(first.should_notify).toBe(true);
 
     const sent = await handleSendLineNotification({
-      listing_id: first.listing_id,
+      candidate: validCandidate,
       event_type: first.event_type as "new_listing",
-      event_hash: first.event_hash!,
-      message_body: first.message_body!,
     });
     expect(sent.status).toBe("sent");
 
@@ -45,15 +43,13 @@ describe("end-to-end agent flow", () => {
     const second = await handleUpsertListing({
       candidate: validCandidate,
       run_id: "r2",
-      triage_base_url: "https://app.example.com",
     });
     expect(second.should_notify).toBe(false);
 
-    // Third run, price drop: notify
+    // Third run, price drop: upsert reports notify
     const third = await handleUpsertListing({
       candidate: { ...validCandidate, rent_price: 22000 },
       run_id: "r3",
-      triage_base_url: "https://app.example.com",
     });
     expect(third.should_notify).toBe(true);
     expect(third.event_type).toBe("price_drop");

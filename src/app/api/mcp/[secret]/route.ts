@@ -17,7 +17,6 @@ const handler = createMcpHandler(
         inputSchema: {
           candidate: CandidateSchema,
           run_id: z.string().min(1),
-          triage_base_url: z.string().url(),
         },
       },
       async (input) => {
@@ -48,14 +47,10 @@ const handler = createMcpHandler(
       {
         title: "Send LINE Notification",
         description:
-          "Notify via LINE broadcast. Preferred shape: {candidate, event_type, triage_base_url} — server renders the message and dedupes by (source, source_listing_id, event_type, event_hash). Legacy shape: {listing_id, event_type, event_hash, message_body}. Ad-hoc shape: {message_body}.",
+          "Notify via LINE broadcast. Required shape: {candidate, event_type}. Server renders the message and dedupes by (source, source_listing_id) — one LINE per listing, across all agents.",
         inputSchema: {
-          candidate: CandidateSchema.optional(),
-          event_type: z.string().min(1).optional(),
-          triage_base_url: z.string().url().optional(),
-          listing_id: z.string().uuid().optional(),
-          event_hash: z.string().regex(/^[0-9a-f]{64}$/).optional(),
-          message_body: z.string().min(1).optional(),
+          candidate: CandidateSchema,
+          event_type: z.string().min(1),
         },
       },
       async (input) => {

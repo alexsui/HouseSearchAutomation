@@ -10,22 +10,3 @@
     Process only the FIRST 30 listings per run. Agent rubric applies
     district whitelist at the detail-page step (e.g. avoid 社子島 in
     Shilin, central 中山 if not Dazhi/Jiannan).
-
-- name: sanchong_taipei_bridge
-  priority: 2
-  districts: [Sanchong]
-  search_urls:
-    - https://rent.591.com.tw/list?region=3&section=43&kind=1&price=20000_30000&layout=2&other=cook&sort=posttime_desc
-  note: >
-    新北市三重區 (Sanchong, region=3 section=43), 2房 整層住家 ≤30k, newest first.
-    Process only the FIRST 15 listings per run (half of Taipei cap since
-    this is a proximity-gated exploration group).
-    **Proximity gate:** include the listing ONLY if the public address /
-    nearby-station text clearly indicates within ~1km walking distance
-    of 台北橋站 (Orange line 中和新蘆線). Positive signals:
-      - 台北橋站 / 台北橋 X 分鐘 explicitly in title or description
-      - address on 重新路一段, 重新路二段, 正義北路, 中央北路,
-        三和路一段, near 淡水河 / 大同區 side of Sanchong
-    Negative signals (REJECT): 菜寮站, 三重站, 先嗇宮站, 三重國小站,
-    湯城, 重陽路, 集美街 (these are all further west — not 台北橋 area).
-    Uncertain → reject.

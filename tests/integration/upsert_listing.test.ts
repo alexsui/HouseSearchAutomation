@@ -21,7 +21,6 @@ describe("handleUpsertListing", () => {
     const result = await handleUpsertListing({
       candidate: validCandidate,
       run_id: "run-1",
-      triage_base_url: "https://app.example.com",
     });
     expect(result.should_notify).toBe(true);
     expect(result.event_type).toBe("new_listing");
@@ -33,12 +32,10 @@ describe("handleUpsertListing", () => {
     await handleUpsertListing({
       candidate: validCandidate,
       run_id: "run-1",
-      triage_base_url: "https://app.example.com",
     });
     const second = await handleUpsertListing({
       candidate: validCandidate,
       run_id: "run-2",
-      triage_base_url: "https://app.example.com",
     });
     expect(second.should_notify).toBe(false);
   });
@@ -47,13 +44,11 @@ describe("handleUpsertListing", () => {
     await handleUpsertListing({
       candidate: validCandidate,
       run_id: "run-1",
-      triage_base_url: "https://app.example.com",
     });
     const dropped = { ...validCandidate, rent_price: 23000 };
     const second = await handleUpsertListing({
       candidate: dropped,
       run_id: "run-2",
-      triage_base_url: "https://app.example.com",
     });
     expect(second.should_notify).toBe(true);
     expect(second.event_type).toBe("price_drop");
@@ -66,7 +61,6 @@ describe("handleUpsertListing", () => {
       handleUpsertListing({
         candidate: bad as unknown as typeof validCandidate,
         run_id: "run-1",
-        triage_base_url: "https://app.example.com",
       }),
     ).rejects.toThrow();
   });

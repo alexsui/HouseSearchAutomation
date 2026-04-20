@@ -18,8 +18,10 @@ export const REQUIRED_APPLIANCES = [
 ] as const;
 export type Appliance = (typeof REQUIRED_APPLIANCES)[number];
 
+export type ListingSource = "591" | "nearyou";
+
 export interface ListingIdentity {
-  source: "591";
+  source: ListingSource;
   source_listing_id: string;
   source_url: string;
 }

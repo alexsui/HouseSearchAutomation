@@ -35,6 +35,11 @@ const APPLIANCE_ZH: Record<string, string> = {
   water_heater: "熱水器",
 };
 
+const SOURCE_LABEL: Record<Candidate["listing_identity"]["source"], string> = {
+  "591": "591",
+  nearyou: "NearYou",
+};
+
 function zhAppliances(list: readonly string[]): string {
   return list.map((a) => APPLIANCE_ZH[a] ?? a).join("、");
 }
@@ -42,12 +47,11 @@ function zhAppliances(list: readonly string[]): string {
 export interface RenderInput {
   event_type: Exclude<ChangeType, "none">;
   candidate: Candidate;
-  triage_url: string;
   price_drop?: { previous: number; current: number };
 }
 
 export function renderMessage(input: RenderInput): string {
-  const { event_type, candidate, triage_url, price_drop } = input;
+  const { event_type, candidate, price_drop } = input;
   const c = candidate;
   const header = `[${HEADER[event_type]}] ${c.district} ${c.layout.split("房")[0]}房 NT$${fmt(c.rent_price)}`;
 
@@ -78,7 +82,9 @@ export function renderMessage(input: RenderInput): string {
 
   if (c.photo_review === "poor") lines.push("⚠ 高度警示：照片狀況不佳，建議手動確認");
 
-  lines.push(`591：${c.listing_identity.source_url}`, `詳情頁：${triage_url}`);
+  lines.push(
+    `${SOURCE_LABEL[c.listing_identity.source]}：${c.listing_identity.source_url}`,
+  );
 
   // Notifier self-attribution as the final line. Provided by the agent —
   // server does not hardcode a model name.

@@ -4,7 +4,7 @@ import { REQUIRED_APPLIANCES } from "./types";
 const ApplianceEnum = z.enum(REQUIRED_APPLIANCES);
 
 export const ListingIdentitySchema = z.object({
-  source: z.literal("591"),
+  source: z.enum(["591", "nearyou"]),
   source_listing_id: z.string().min(1),
   source_url: z.string().url(),
 });

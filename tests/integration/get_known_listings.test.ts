@@ -27,7 +27,6 @@ describe("handleGetKnownListings", () => {
     await handleUpsertListing({
       candidate: validCandidate,
       run_id: "run-1",
-      triage_base_url: "https://app.example.com",
     });
     const out = await handleGetKnownListings({ source: "591" });
     expect(out).toHaveLength(1);
@@ -42,7 +41,6 @@ describe("handleGetKnownListings", () => {
     await handleUpsertListing({
       candidate: validCandidate,
       run_id: "run-1",
-      triage_base_url: "https://app.example.com",
     });
     const future = new Date(Date.now() + 60_000).toISOString();
     const out = await handleGetKnownListings({ source: "591", since: future });

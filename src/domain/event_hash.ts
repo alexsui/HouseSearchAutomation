@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto";
 import { canonicalJson } from "./canonical";
-import type { ChangeType } from "./types";
+import type { ChangeType, ListingSource } from "./types";
 
 export type EventType = Exclude<ChangeType, "none">;
 
 export interface EventHashInput {
   event_type: EventType;
-  source: "591";
+  source: ListingSource;
   source_listing_id: string;
   payload: Record<string, unknown>;
 }
