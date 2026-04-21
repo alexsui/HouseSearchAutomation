@@ -3,17 +3,18 @@ name: house-search-runbook
 description: |
   Use for the scheduled house-search automation. Reads fixed 591 search groups from
   config/search_groups.yaml, evaluates new or changed listings against the photo/appliance
-  rubric, and pushes qualifying candidates directly to LINE via the single
-  `send_line_notification` MCP tool. Server dedupes repeats per (source_listing_id,
-  event_type, event_hash) so the agent can fire without tracking state.
+  rubric, and pushes qualifying candidates to Telegram via the single
+  `send_line_notification` MCP tool (name retained for compatibility; channel is Telegram).
+  Server dedupes repeats per (source, source_listing_id) so the agent can fire without
+  tracking state.
 ---
 
 # House Search Runbook
 
 You are the scheduled hourly agent for a personal Taipei rental search. You read public
-591 pages, judge listing photos and descriptions, and notify the user via LINE. The only
-MCP tool you need is `send_line_notification` — the server handles rendering, dedup, and
-delivery.
+591 pages, judge listing photos and descriptions, and notify the user via Telegram. The
+only MCP tool you need is `send_line_notification` (legacy name — delivery is Telegram).
+The server handles rendering, dedup, and delivery.
 
 ## Inputs you can rely on
 
@@ -25,9 +26,9 @@ delivery.
     "event_type": "new_listing"
   }
   ```
-  The server renders the LINE message, dedupes by (source, source_listing_id, event_type,
-  event_hash), and broadcasts. Response: `{status: "sent" | "failed" | "already_sent",
-  notification_id: <uuid|null>}`. If `already_sent` or `failed`, move on — don't retry.
+  The server renders the message, dedupes by (source, source_listing_id), and pushes to
+  Telegram. Response: `{status: "sent" | "failed" | "already_sent", notification_id:
+  <uuid|null>}`. If `already_sent` or `failed`, move on — don't retry.
 - Built-in tools: `Bash`, `Read`, `Glob`, `Grep`, `Write` (WebFetch is unused — 591 is a SPA).
 - Local CLI: `agent-browser` at `/Users/samuel/.local/bin/agent-browser`. Used for both
   search listing pages and detail pages.
@@ -50,9 +51,9 @@ delivery.
 6. **Xizhi proximity gate.** For any listing in a Xizhi-targeted group, include it ONLY if
    the public listing info (address, nearby-station text, street name) makes it clearly very
    close to the Neihu border (≈500m–1km). If uncertain, reject.
-7. **Call MCP for every LINE notification.** Never push to LINE directly.
+7. **Call MCP for every notification.** Never push to Telegram directly.
 8. **Trust the server's dedup.** If `send_line_notification` returns `already_sent`, the
-   server has already notified for this (source_listing_id, event_type, event_hash) combo.
+   server has already notified for this (source, source_listing_id) pair.
 9. **When evidence is weak, say so.** Write "needs manual confirmation" in `concerns` rather
    than pretending to know.
 
@@ -100,7 +101,7 @@ loaded more.
 
 You don't need a local dedup step. Every listing in the top-30 goes through the pipeline;
 the server dedupes at the notify boundary. Repeated listings return `already_sent` and cost
-one cheap DB check — no LINE fire, no wasted time on re-rendering the message.
+one cheap DB check — no Telegram fire, no wasted time on re-rendering the message.
 
 ### 3. For each listing: open detail page and extract fields
 
@@ -219,7 +220,7 @@ reject. The rubric is intentionally strict — false negatives beat false positi
 `change_type` is advisory to the dedup hash — leave it `"new_listing"` unless you're
 explicitly tracking a `price_drop` or similar.
 
-`notifier_signature` is the last line the LINE recipient sees (rendered as
+`notifier_signature` is the last line the Telegram recipient sees (rendered as
 `— <signature>`). Set it to identify yourself: e.g. `"由 Claude 自動檢查並通知"`,
 or if you are a different model, substitute your own name. This keeps the server
 free of any hardcoded model name.
@@ -234,9 +235,9 @@ send_line_notification({
 ```
 
 Response:
-- `{status: "sent"}` → LINE got the message, logged. You're done with this listing.
+- `{status: "sent"}` → Telegram got the message, logged. You're done with this listing.
 - `{status: "already_sent"}` → server already notified for this combo; silently move on.
-- `{status: "failed"}` → LINE API rejected; logged as failed server-side. Move on — don't retry.
+- `{status: "failed"}` → Telegram API rejected; logged as failed server-side. Move on — don't retry.
 
 ### 8. Run summary
 
@@ -254,7 +255,7 @@ Close the agent-browser session when done: `agent-browser --session hs close`.
 ## What not to do
 
 - Do not invent listings. If you cannot extract a required field, skip the listing.
-- Do not push to LINE outside `send_line_notification`.
+- Do not push to Telegram outside `send_line_notification`.
 - Do not write anywhere on disk except `/tmp/`.
 - Do not fetch anything outside 591's public pages and the `img[12].591.com.tw/house/` image CDN.
 - Do not retry a failed MCP call more than once within the same run.

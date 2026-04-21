@@ -3,11 +3,9 @@ import { z } from "zod";
 const ServerEnvSchema = z.object({
   SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  LINE_CHANNEL_ACCESS_TOKEN: z.string().min(1),
+  TELEGRAM_BOT_TOKEN: z.string().min(1),
+  TELEGRAM_CHAT_ID: z.string().min(1),
   AUTOMATION_SECRET: z.string().min(16),
-  TRIAGE_PASSWORD: z.string().min(8),
-  NEXT_PUBLIC_SITE_URL: z.string().url(),
-  SESSION_SIGNING_SECRET: z.string().min(32),
 });
 
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;

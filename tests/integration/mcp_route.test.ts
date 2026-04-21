@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import { getServerClient, resetClientForTests } from "@/services/supabase";
 import { loadServerEnv } from "@/config/env";
 import { POST } from "@/app/api/mcp/[secret]/route";
-import { mockFetchOk } from "../fixtures/line_mock";
+import { mockFetchOk } from "../fixtures/telegram_mock";
 
 beforeAll(() => {
   config({ path: ".env.local" });

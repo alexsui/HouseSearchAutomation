@@ -4,7 +4,7 @@ import { getServerClient, resetClientForTests } from "@/services/supabase";
 import { loadServerEnv } from "@/config/env";
 import { handleSendLineNotification } from "@/mcp/handlers/send_line_notification";
 import { validCandidate } from "../fixtures/candidates";
-import { mockFetchOk, mockFetchFail } from "../fixtures/line_mock";
+import { mockFetchOk, mockFetchFail, isTelegramUrl } from "../fixtures/telegram_mock";
 
 beforeAll(() => {
   config({ path: ".env.local" });
@@ -38,13 +38,13 @@ describe("handleSendLineNotification", () => {
     expect(second.status).toBe("already_sent");
     expect(second.notification_id).toBeNull();
 
-    const lineCalls = fetchMock.mock.calls.filter(
-      ([url]) => String(url) === "https://api.line.me/v2/bot/message/broadcast",
+    const tgCalls = fetchMock.mock.calls.filter(([url]) =>
+      isTelegramUrl(String(url)),
     );
-    expect(lineCalls).toHaveLength(1);
+    expect(tgCalls).toHaveLength(1);
 
-    const body = JSON.parse((lineCalls[0]![1] as RequestInit).body as string);
-    const text = body.messages[0].text as string;
+    const body = JSON.parse((tgCalls[0]![1] as RequestInit).body as string);
+    const text = body.text as string;
     expect(text).toContain(`標題：${validCandidate.title}`);
     expect(text).toContain("預算分級：強力推薦");
     expect(text).toContain(
@@ -71,11 +71,11 @@ describe("handleSendLineNotification", () => {
     expect(out.status).toBe("sent");
     expect(out.notification_id).not.toBeNull();
 
-    const lineCalls = fetchMock.mock.calls.filter(
-      ([url]) => String(url) === "https://api.line.me/v2/bot/message/broadcast",
+    const tgCalls = fetchMock.mock.calls.filter(([url]) =>
+      isTelegramUrl(String(url)),
     );
-    const body = JSON.parse((lineCalls[0]![1] as RequestInit).body as string);
-    const text = body.messages[0].text as string;
+    const body = JSON.parse((tgCalls[0]![1] as RequestInit).body as string);
+    const text = body.text as string;
     expect(text).toContain(`NearYou：${nearyouCandidate.listing_identity.source_url}`);
   });
 
@@ -87,10 +87,10 @@ describe("handleSendLineNotification", () => {
     });
     expect(out.status).toBe("already_sent");
     expect(out.notification_id).toBeNull();
-    const lineCalls = fetchMock.mock.calls.filter(
-      ([url]) => String(url) === "https://api.line.me/v2/bot/message/broadcast",
+    const tgCalls = fetchMock.mock.calls.filter(([url]) =>
+      isTelegramUrl(String(url)),
     );
-    expect(lineCalls).toHaveLength(0);
+    expect(tgCalls).toHaveLength(0);
   });
 
   it("records failed notification on LINE API error", async () => {

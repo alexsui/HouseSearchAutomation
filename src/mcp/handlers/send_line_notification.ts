@@ -1,4 +1,4 @@
-import { pushLineMessage } from "@/services/line";
+import { pushTelegramMessage } from "@/services/telegram";
 import {
   hasPriorSourceNotification,
   insertNotification,
@@ -61,7 +61,7 @@ export async function handleSendLineNotification(
 
   const message_body = renderMessage({ event_type, candidate });
 
-  const pushResult = await pushLineMessage(message_body);
+  const pushResult = await pushTelegramMessage(message_body);
   const row = await insertNotification({
     source: candidate.listing_identity.source,
     source_listing_id: candidate.listing_identity.source_listing_id,

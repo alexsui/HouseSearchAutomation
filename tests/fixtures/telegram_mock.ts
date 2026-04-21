@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-const LINE_URL = "https://api.line.me/v2/bot/message/broadcast";
+const TELEGRAM_URL_RE = /^https:\/\/api\.telegram\.org\/bot[^/]+\/sendMessage$/;
 
 function wrap(
   handler: (url: string, init?: RequestInit) => Response,
@@ -8,7 +8,7 @@ function wrap(
   const realFetch = globalThis.fetch;
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
-    if (url === LINE_URL) return handler(url, init);
+    if (TELEGRAM_URL_RE.test(url)) return handler(url, init);
     return realFetch(input, init);
   });
   vi.stubGlobal("fetch", fetchMock);
@@ -18,7 +18,7 @@ function wrap(
 export function mockFetchOk(): ReturnType<typeof vi.fn> {
   return wrap(
     () =>
-      new Response(JSON.stringify({}), {
+      new Response(JSON.stringify({ ok: true, result: { message_id: 1 } }), {
         status: 200,
         headers: { "content-type": "application/json" },
       }),
@@ -27,7 +27,7 @@ export function mockFetchOk(): ReturnType<typeof vi.fn> {
 
 export function mockFetchFail(
   status = 500,
-  body: Record<string, unknown> = { message: "err" },
+  body: Record<string, unknown> = { ok: false, description: "err" },
 ): ReturnType<typeof vi.fn> {
   return wrap(
     () =>
@@ -36,4 +36,8 @@ export function mockFetchFail(
         headers: { "content-type": "application/json" },
       }),
   );
+}
+
+export function isTelegramUrl(url: string): boolean {
+  return TELEGRAM_URL_RE.test(url);
 }

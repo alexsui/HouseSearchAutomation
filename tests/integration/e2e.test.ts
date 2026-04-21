@@ -6,7 +6,7 @@ import { handleUpsertListing } from "@/mcp/handlers/upsert_listing";
 import { handleSendLineNotification } from "@/mcp/handlers/send_line_notification";
 import { handleGetKnownListings } from "@/mcp/handlers/get_known_listings";
 import { validCandidate } from "../fixtures/candidates";
-import { mockFetchOk } from "../fixtures/line_mock";
+import { mockFetchOk } from "../fixtures/telegram_mock";
 
 beforeAll(() => {
   config({ path: ".env.local" });
